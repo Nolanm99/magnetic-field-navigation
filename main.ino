@@ -1,4 +1,4 @@
-#include <SparkFun_MAG3110.h>
+ #include <SparkFun_MAG3110.h>
 #include <SparkFun_TB6612.h>
 
 const int offsetA = 1;
@@ -65,13 +65,22 @@ void loop() {
 
   
 
-  if(mag.readHeading() > 0) {
-      Serial.println(">0 < 180");
-      left(motor1,motor2,75);
+  if(mag.readHeading() > 10 && mag.readHeading() < 170) {    // NORTHEAST TO SOUTHEAST
+      Serial.println("GOING LEFT");
+      left(motor1,motor2,80);
   }
-    else {
-      Serial.println("not");
-      right(motor1,motor2,75);
-    }
-    delay(500);
+  else if (mag.readHeading() < -10 && mag.readHeading() > -170){                      // NORTHWEST TO SOUTHWEST
+    Serial.println("GOING RIGHT");
+    right(motor1,motor2,80);
+  }
+  else {
+    Serial.println("POINTED NORTH");
+    back(motor1, motor2, 80);
+  }
+  delay(250);
+
+
+
+
+    
   }
