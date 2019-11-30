@@ -3,6 +3,8 @@
 
 const int offsetA = 1;
 const int offsetB = 1;
+int migrating = 0;
+int migrated = 0;
 
 #define AIN1 2
 #define BIN1 6
@@ -24,6 +26,7 @@ void setup() {
   Wire.setClock(400000);    // I2C fast mode, 400kHz
 
   mag.initialize(); //Initialize the MAG3110
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
@@ -42,12 +45,14 @@ void loop() {
       //Must call every loop while calibrating to collect calibration data
       //This will automatically exit calibration
       //You can terminate calibration early by calling mag.exitCalMode();
-      mag.calibrate(); 
+      mag.calibrate();
+      digitalWrite(LED_BUILTIN, LOW);
     }
   }
   else
   {
     Serial.println("Calibrated!");
+    digitalWrite(LED_BUILTIN, HIGH);
   }
   mag.readMag(&x, &y, &z);
 
@@ -65,17 +70,22 @@ void loop() {
 
   
 
-  if(mag.readHeading() > 10 && mag.readHeading() < 170) {    // NORTHEAST TO SOUTHEAST
+  if(mag.readHeading() > 10 && mag.readHeading() < 170 && mag.isCalibrated() && migrated == 0) {    // NORTHEAST TO SOUTHEAST
       Serial.println("GOING LEFT");
-      left(motor1,motor2,80);
+      left(motor1,motor2,85);
   }
-  else if (mag.readHeading() < -10 && mag.readHeading() > -170){                      // NORTHWEST TO SOUTHWEST
+  else if (mag.readHeading() < -10 && mag.readHeading() > -170 && mag.isCalibrated() && migrated == 0){                      // NORTHWEST TO SOUTHWEST
     Serial.println("GOING RIGHT");
-    right(motor1,motor2,80);
+    right(motor1,motor2,85);
   }
   else {
-    Serial.println("POINTED NORTH");
-    back(motor1, motor2, 80);
+    if (migrating < 15 && mag.isCalibrated()) {
+      Serial.println("TRAVELING NORTH");
+      back(motor1, motor2, 85);
+      migrating += 1;
+      migrated = 1;
+    }
+    Serial.println("MIGRATED");
   }
   delay(250);
 
