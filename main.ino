@@ -1,4 +1,4 @@
- #include <SparkFun_MAG3110.h>
+#include <SparkFun_MAG3110.h>
 #include <SparkFun_TB6612.h>
 
 const int offsetA = 1;
@@ -70,23 +70,28 @@ void loop() {
 
   
 
-  if(mag.readHeading() > 10 && mag.readHeading() < 170 && mag.isCalibrated() && migrated == 0) {    // NORTHEAST TO SOUTHEAST
+  if(mag.readHeading() > 10 && mag.readHeading() < 170 && mag.isCalibrated() && migrating < 10) {    // NORTHEAST TO SOUTHEAST
       Serial.println("GOING LEFT");
-      left(motor1,motor2,85);
+      left(motor1,motor2,80);
   }
-  else if (mag.readHeading() < -10 && mag.readHeading() > -170 && mag.isCalibrated() && migrated == 0){                      // NORTHWEST TO SOUTHWEST
+  else if (mag.readHeading() < -10 && mag.readHeading() > -170 && mag.isCalibrated() && migrating < 10){                      // NORTHWEST TO SOUTHWEST
     Serial.println("GOING RIGHT");
-    right(motor1,motor2,85);
+    right(motor1,motor2,80);
   }
   else {
-    if (migrating < 15 && mag.isCalibrated()) {
+    if (migrating < 10 && mag.isCalibrated()) {
       Serial.println("TRAVELING NORTH");
-      back(motor1, motor2, 85);
+      back(motor1, motor2, 80);
       migrating += 1;
-      migrated = 1;
+      
     }
-    Serial.println("MIGRATED");
+    else if (mag.isCalibrated() && migrating == 10) {
+      Serial.println("MIGRATED");
+      brake(motor1, motor2);
+    }
   }
+
+  Serial.println(migrating);
   delay(250);
 
 
